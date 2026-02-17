@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo } from 'react';
 export const SUPPORTED_CURRENCIES = ['AUD', 'BGN', 'BRL', 'CAD', 'CHF', 'CNY', 'CZK', 'DKK', 'EUR', 'GBP', 'HKD', 'HUF', 'IDR', 'ILS', 'INR', 'ISK', 'JPY', 'KRW', 'MXN', 'MYR', 'NOK', 'NZD', 'PHP', 'PLN', 'RON', 'SEK', 'SGD', 'THB', 'TRY', 'USD', 'ZAR'].sort();
 
 export function useForexData(base: string, start: string, end: string, visible: string[]) {
-  const [chartData, setChartData] = useState([]);
+  const [chartData, setChartData] = useState<Array<{ name: string; [key: string]: any }>>([]);
   const [loading, setLoading] = useState(true);
 
   const yDomain = useMemo(() => {
