@@ -1,3 +1,6 @@
+## 🔗 Live Demo
+Check out the production build here: [full-stack-dashboard-omega.vercel.app](https://full-stack-dashboard-omega.vercel.app)
+
 💸 Forex Doll x Brat 365 💸
 Market analysis with a vibe shift.
 
