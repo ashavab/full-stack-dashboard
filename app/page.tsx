@@ -29,6 +29,12 @@ export default function Dashboard() {
     fetchPrices();
   }, []);
 
+    const transactions = [
+        { id: 1, asset: 'Bitcoin', type: 'Buy', amount: '0.02 BTC', status: 'Completed', date: 'Oct 24, 2025' },
+        { id: 2, asset: 'Ethereum', type: 'Sell', amount: '1.5 ETH', status: 'Pending', date: 'Oct 23, 2025' },
+        { id: 3, asset: 'Bitcoin', type: 'Buy', amount: '0.005 BTC', status: 'Completed', date: 'Oct 22, 2025' },
+      ];
+
   return (
     <main className="flex min-h-screen bg-gray-900 text-white">
       <aside className="w-64 border-r border-gray-800 p-6 hidden md:block">
