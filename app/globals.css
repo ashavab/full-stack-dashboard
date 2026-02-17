@@ -1,26 +1,31 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@layer base {
+  /* Remove the !important from here to allow the vibe shift */
+  html:not(.dark) body {
+    background: radial-gradient(circle at top left, #ffffff 0%, #fff5f7 40%, #fffafa 100%) fixed;
+    color: #3d3d3d;
+  }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  /* This specifically targets the Brat state */
+  html.dark body {
+    background-color: #000000 !important;
+    background-image: none !important;
+    color: #8ace00 !important;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  @keyframes brat-glitch {
+    0% { transform: translate(0); }
+    20% { transform: translate(-2px, 2px); filter: hue-rotate(10deg); }
+    40% { transform: translate(2px, -2px); }
+    60% { transform: translate(-2px, -2px); filter: contrast(120%); }
+    100% { transform: translate(0); }
+  }
+  .animate-brat-glitch {
+    animation: brat-glitch 0.2s steps(2, end) infinite;
+  }
 }

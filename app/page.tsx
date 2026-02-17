@@ -1,99 +1,125 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Wallet, ArrowUpRight, Activity } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useForexData, SUPPORTED_CURRENCIES } from './useForexData';
+import { DateControls, CurrencyGrid, PerformanceChart, BoutiqueFooter, BratMusic } from './ForexComponents';
+import { Globe, Sparkles, VolumeX, Music } from 'lucide-react';
 
-const data = [
-  { name: 'Mon', price: 62000 },
-  { name: 'Tue', price: 64000 },
-  { name: 'Wed', price: 63000 },
-  { name: 'Thu', price: 67000 },
-  { name: 'Fri', price: 66000 },
-  { name: 'Sat', price: 69000 },
-  { name: 'Sun', price: 71000 },
-];
+export default function ForexDashboard() {
+  const [base, setBase] = useState('GBP');
+  const [start, setStart] = useState('2025-02-17');
+  const [end, setEnd] = useState(new Date().toISOString().split('T')[0]);
+  const [visible, setVisible] = useState(['USD', 'EUR', 'JPY']);
+  const [isBratMode, setIsBratMode] = useState(false);
 
-export default function Dashboard() {
-  const [prices, setPrices] = useState({ btc: 0, eth: 0 });
+  const { chartData, yDomain } = useForexData(base, start, end, visible);
 
+  // NUCLEAR STYLE INJECTION: Force black background over layout/global overrides
   useEffect(() => {
-    const fetchPrices = async () => {
-      try {
-        const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd');
-        const json = await res.json();
-        setPrices({ btc: json.bitcoin.usd, eth: json.ethereum.usd });
-      } catch (error) {
-        console.error("Failed to fetch prices:", error);
-      }
-    };
-    fetchPrices();
-  }, []);
+    const styleId = 'brat-force-dark';
+    let styleTag = document.getElementById(styleId);
 
-    const transactions = [
-        { id: 1, asset: 'Bitcoin', type: 'Buy', amount: '0.02 BTC', status: 'Completed', date: 'Oct 24, 2025' },
-        { id: 2, asset: 'Ethereum', type: 'Sell', amount: '1.5 ETH', status: 'Pending', date: 'Oct 23, 2025' },
-        { id: 3, asset: 'Bitcoin', type: 'Buy', amount: '0.005 BTC', status: 'Completed', date: 'Oct 22, 2025' },
-      ];
+    if (isBratMode) {
+      document.documentElement.classList.add('dark');
+      if (!styleTag) {
+        styleTag = document.createElement('style');
+        styleTag.id = styleId;
+        styleTag.innerHTML = `
+          html, body, :host, #root, [data-theme], .light, .dark {
+            background-color: #000000 !important;
+            background: #000000 !important;
+            color: #8ace00 !important;
+          }
+          * { border-color: #8ace0033 !important; }
+        `;
+        document.head.appendChild(styleTag);
+      }
+    } else {
+      document.documentElement.classList.remove('dark');
+      if (styleTag) styleTag.remove();
+    }
+    return () => { styleTag?.remove(); };
+  }, [isBratMode]);
+
+  const getColor = (c: string) => {
+    const hue = (SUPPORTED_CURRENCIES.indexOf(c) * 137.5) % 360;
+    return isBratMode ? `hsl(${hue}, 95%, 60%)` : `hsl(${hue}, 65%, 70%)`;
+  };
+
+  const handlePreset = (label: string) => {
+    const endD = new Date();
+    const startD = new Date();
+    if (label === '1W') startD.setDate(endD.getDate() - 7);
+    else if (label === '1M') startD.setMonth(endD.getMonth() - 1);
+    else if (label === '1Y') startD.setFullYear(endD.getFullYear() - 1);
+    else if (label === 'MAX') startD.setFullYear(1999);
+    setStart(startD.toISOString().split('T')[0]);
+    setEnd(endD.toISOString().split('T')[0]);
+  };
 
   return (
-    <main className="flex min-h-screen bg-gray-900 text-white">
-      <aside className="w-64 border-r border-gray-800 p-6 hidden md:block">
-        <h1 className="text-xl font-bold text-emerald-500 mb-10">SmartDash</h1>
-        <nav className="space-y-4">
-          <div className="text-gray-400 hover:text-white cursor-pointer">Overview</div>
-          <div className="text-gray-400 hover:text-white cursor-pointer">Portfolio</div>
-        </nav>
-      </aside>
-
-      <section className="flex-1 p-8">
-        <header className="flex justify-between items-center mb-8">
-          <h2 className="text-2xl font-semibold">Market Overview</h2>
-          <button className="bg-emerald-600 px-4 py-2 rounded-lg font-medium hover:bg-emerald-500">Connect Wallet</button>
+    <main className={`min-h-screen transition-all duration-500 ${isBratMode ? 'bg-black' : 'p-4 md:p-8'}`}>
+      <BratMusic isActive={isBratMode} />
+      
+      <div className="max-w-7xl mx-auto space-y-8 relative z-10 p-4 md:p-8">
+        <header className={`p-10 transition-all border-4 ${
+          isBratMode 
+            ? 'bg-black border-[#8ace00] animate-brat-glitch shadow-[0_0_60px_rgba(138,206,0,0.4)]' 
+            : 'bg-white/70 rounded-[4rem] border-white backdrop-blur-3xl shadow-xl'
+        }`}>
+          <div className="flex justify-between items-start mb-10">
+            <h1 className={`text-6xl font-black italic tracking-tighter flex items-center gap-3 transition-all ${isBratMode ? 'text-[#8ace00] uppercase skew-x-[-5deg]' : 'text-rose-400'}`}>
+              <Globe size={36} className={isBratMode ? "animate-spin-slow" : ""} /> 
+              forex<span className={isBratMode ? 'line-through decoration-white' : ''}>soft</span>
+            </h1>
+            
+            <div className="flex flex-col items-end gap-4">
+              <button 
+                onClick={() => setIsBratMode(!isBratMode)}
+                className={`flex items-center gap-2 px-8 py-3 font-black text-xs uppercase tracking-widest transition-all ${
+                  isBratMode 
+                    ? 'bg-[#8ace00] text-black border-2 border-white hover:scale-105' 
+                    : 'bg-rose-100 text-rose-500 rounded-full hover:bg-rose-200 shadow-sm'
+                }`}
+              >
+                {isBratMode ? <VolumeX size={16} /> : <Sparkles size={16} />} 
+                {isBratMode ? 'STOP THE PARTY' : 'GO BRAT'}
+              </button>
+              
+              <div className="flex flex-col items-end">
+                <span className={`text-[10px] font-black uppercase mb-2 tracking-widest ${isBratMode ? 'text-[#8ace00]' : 'text-rose-300'}`}>Base Asset</span>
+                <select value={base} onChange={e => setBase(e.target.value)} className={`px-5 py-2 rounded-2xl text-sm font-bold shadow-sm outline-none border-2 ${isBratMode ? 'bg-black text-[#8ace00] border-[#8ace00]' : 'bg-white border-rose-50 text-rose-400'}`}>
+                  {SUPPORTED_CURRENCIES.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+            </div>
+          </div>
+          
+          <DateControls start={start} end={end} onSetStart={setStart} onSetEnd={setEnd} onPreset={handlePreset} isBratMode={isBratMode} />
+          
+          <div className="mt-8">
+            <CurrencyGrid 
+              selected={visible} 
+              onToggle={(c: string) => setVisible(v => v.includes(c) ? v.filter(x => x !== c) : [...v, c])} 
+              base={base} 
+              getColor={getColor} 
+              chartData={chartData} 
+              isBratMode={isBratMode} 
+            />
+          </div>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-2 bg-emerald-500/10 rounded-lg"><Wallet className="text-emerald-500" /></div>
-              <span className="text-emerald-500 flex items-center text-sm"><ArrowUpRight size={16} /> +2.4%</span>
-            </div>
-            <p className="text-gray-400 text-sm">Bitcoin Price</p>
-            <h3 className="text-2xl font-bold">${prices.btc.toLocaleString()}</h3>
-          </div>
-
-          <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-2 bg-blue-500/10 rounded-lg"><Activity className="text-blue-500" /></div>
-            </div>
-            <p className="text-gray-400 text-sm">Ethereum Price</p>
-            <h3 className="text-2xl font-bold">${prices.eth.toLocaleString()}</h3>
-          </div>
-
-          <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-            <p className="text-gray-400 text-sm">Market Status</p>
-            <h3 className="text-xl font-bold text-emerald-400 mt-4">Live Updates Active</h3>
-          </div>
+        <div className={isBratMode ? 'animate-brat-glitch' : ''}>
+          <PerformanceChart 
+            chartData={chartData} 
+            visible={visible} 
+            yDomain={yDomain} 
+            getColor={isBratMode ? () => '#8ace00' : getColor} 
+            isBratMode={isBratMode} 
+          />
         </div>
-
-        <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 h-[400px]">
-          <h3 className="text-lg font-medium mb-6">Price Performance (7D)</h3>
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data}>
-              <defs>
-                <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" vertical={false} />
-              <XAxis dataKey="name" stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis hide domain={['auto', 'auto']} />
-              <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: '8px' }} />
-              <Area type="monotone" dataKey="price" stroke="#10b981" fillOpacity={1} fill="url(#colorPrice)" strokeWidth={3} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </section>
+        
+        <BoutiqueFooter isBratMode={isBratMode} />
+      </div>
     </main>
   );
 }
